@@ -1,10 +1,15 @@
 const express = require('express');
 const app = express();
-const morgan = require('morgan')
+const morgan = require('morgan');
 const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
 
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
+
+mongoose.connect('mongodb://127.0.0.1/node-rest-shop', {useNewUrlParser: true}, ()=>{
+	console.log('Connected to database');
+});
 
 //middleware for handling morgan which logs
 app.use(morgan('dev'));
@@ -21,6 +26,7 @@ app.use((req, res, next)=>{
 	res.header('Access-Control-Allow-Origin','*');
 	//This sets the headers to allow
 	res.header('Access-Control-Allow-Origin','Origin, X-Requested-With, Content-Type, Accept, Authorization');
+	
 	if (req.method === 'OPTIONS'){
 		//Here you put in all the options supported in the api
 		res.header('Access-Control-Allow-Methods', 'PUT, POST, PATCH, DELETE, GET');

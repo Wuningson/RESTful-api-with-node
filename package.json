@@ -1,0 +1,19 @@
+{
+  "name": "rest-shop",
+  "version": "1.0.0",
+  "description": "A node.js project (Building a node RESTful API)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon server.js"
+  },
+  "author": "Wuni Christopher",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "eslint": "^5.15.1",
+    "express": "^4.16.4",
+    "mongoose": "^5.5.3",
+    "morgan": "^1.9.1"
+  }
+}

@@ -8,7 +8,7 @@ router.get('/', (req, res, next)=> {
 	});
 });
 
-//hanling incoming post requests to /orders
+//handling incoming post requests to /orders
 router.post('/', (req, res, next)=>{
 	const order = {
 		productId: req.body.productId,
@@ -16,7 +16,7 @@ router.post('/', (req, res, next)=>{
 	}
 	res.status(201).json({
 		message: 'Orders were created',
-		order: order
+		order
   });  
 });
 
