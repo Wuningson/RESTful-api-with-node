@@ -119,65 +119,90 @@ router.patch('/:productId', (req, res, next)=>{
 	
 	//Instead of the for loop which will require an array input this other lengthy but quite 
 	//straightforward method can be used. The only disadvantage is that it will patch one by one
-	var newValues ={}
-	if (newPrice !== undefined && newName !== undefined && newDescription !== undefined){
-		newValues = {$set: {
-			name: newName,
-			price: newPrice,
-			description: newDescription
-		}};
-	}else if(newPrice == undefined && newName !== undefined && newDescription !== undefined){
-		newValues ={$set:{
-			name: newName,
-			description: newDescription
-		}
-	};
-	}else if(newPrice !== undefined && newName == undefined && newDescription !== undefined){
-		newValues ={$set:{
-			name: newName,
-			price: newPrice
-		}
-	};
-	}else if(newPrice !== undefined && newName == undefined && newDescription !== undefined){
-		newValues ={$set:{
-			description: newDescription,
-			price: newPrice
-		}
-	};
-	}else if(newPrice !== undefined && newName == undefined && newDescription == undefined){
-		newValues ={$set:{
-			price: newPrice
-		}
-	};
-	}else if (newName !== undefined && newPrice == undefined && newDescription == undefined){
-		newValues ={
-			$set:{
-				name: newName
+	Product.findById(id)
+	.select('name price description')
+	.then(doc=>{
+		var newValues ={name: doc.name, price: doc.price, description: doc.description}
+		const reqBody = [newName, newPrice, newDescription];
+		console.log(reqBody);
+		for (var i= 0; i<=reqBody.length - 1; i++){
+			if (reqBody[i] !== undefined){
+				// toBeUsed.unshift(reqBody[i]);
+				if (i==0){
+					newValues.name = newName
+				}else if(i==1){
+					newValues.price = newPrice
+				}else{
+					newValues.description = newDescription
+				}
 			}
-		};		
-	}else if(newPrice == undefined && newName == undefined && newDescription !== undefined){
-		newValues ={$set:{
-			description: newDescription
 		}
-	};
-	Product.updateOne({_id: id}, newValues)
-	.exec()
-	.then(updated=>{
-		res.status(200).json({
-			message: 'Product updated',
-			request: {
-				type: 'GET',
-				url: 'http://localhost:3000/products/' + id
-			}
+		
+	
+		Product.updateOne({_id: id}, {$set:newValues})
+		.exec()
+		.then(updated=>{
+			res.status(200).json({
+				message: 'Product updated',
+				request: {
+					type: 'GET',
+					url: 'http://localhost:3000/products/' + id
+				}
+			});
+		})
+		.catch(err=>{
+			console.log(err);
+			res.status(500).json({
+				error: err
+			});
 		});
 	})
 	.catch(err=>{
 		console.log(err);
-		res.status(500).json({
-			error: err
-		});
-	});
-	}
+	})
+	
+	// if (newPrice !== undefined && newName !== undefined && newDescription !== undefined){
+	// 	newValues = {$set: {
+	// 		name: newName,
+	// 		price: newPrice,
+	// 		description: newDescription
+	// 	}};
+	// }else if(newPrice == undefined && newName !== undefined && newDescription !== undefined){
+	// 	newValues ={$set:{
+	// 		name: newName,
+	// 		description: newDescription
+	// 	}
+	// };
+	// }else if(newPrice !== undefined && newName == undefined && newDescription !== undefined){
+	// 	newValues ={$set:{
+	// 		name: newName,
+	// 		price: newPrice
+	// 	}
+	// };
+	// }else if(newPrice !== undefined && newName == undefined && newDescription !== undefined){
+	// 	newValues ={$set:{
+	// 		description: newDescription,
+	// 		price: newPrice
+	// 	}
+	// };
+	// }else if(newPrice !== undefined && newName == undefined && newDescription == undefined){
+	// 	newValues ={$set:{
+	// 		price: newPrice
+	// 	}
+	// };
+	// }else if (newName !== undefined && newPrice == undefined && newDescription == undefined){
+	// 	newValues ={
+	// 		$set:{
+	// 			name: newName
+	// 		}
+	// 	};		
+	// }else if(newPrice == undefined && newName == undefined && newDescription !== undefined){
+	// 	newValues ={$set:{
+	// 		description: newDescription
+	// 	}
+	// };
+	// let toBeUsed = []
+
 });
 
 router.delete('/:productId', (req, res, next)=>{
