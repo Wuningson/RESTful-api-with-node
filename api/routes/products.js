@@ -2,12 +2,40 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../models/product');
 const mongoose = require('mongoose');
+const multer = require('multer');
+const storage = multer.diskStorage({
+	destination: function (req, file, cb) {
+		cb(null, './uploads')
+	},
+	filename: function (req, file, cb) {
+		cb(null, file.fieldname + '-' + Date.now() + '-' + file.originalname )
+	}
+});
+
+const fileFilter = (req, file, cb) => {
+	//accept
+	if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+		cb(null, true);	//You can set something else in this cb for the null part so as to have a response
+	}else{
+		cb(new Error('Product not created'), false);
+	}
+}
+
+const upload = multer({ 
+	storage, 
+	limits: {
+	fileSize: 1024 * 1024 * 5
+	},
+	fileFilter
+})
+
+//To get access to the uploads, we can either have a route to /uploads or use a middleware in the app.js file.
 
 //Here only the / is used because the middleware in the app.js already filters so that only requests with the /products
 //are forwarded to this file as such if /products is added in the get function the request url will have to /products/p
 router.get('/', (req, res, next)=>{
 	Product.find()
-	.select('name price _id')
+	.select('name price _id productImage')
 	//This function select basically selects the keys provided and their values to be returned instead of the entire
 	//object
 	.exec()
@@ -18,10 +46,11 @@ router.get('/', (req, res, next)=>{
 				return {
 					name: doc.name,
 					price: doc.price,
+					productImage: doc.productImage,
 					_id: doc._id,
 					request: {
 						type: 'GET',
-						url: 'http://localhost:3000/products/' + doc._id
+						url: 'http://localhost:4444/products/' + doc._id
 					}
 				}
 			})
@@ -41,12 +70,13 @@ router.get('/', (req, res, next)=>{
 });
 
 //when posting its better to send a status code of 201
-router.post('/', (req, res, next)=>{
+router.post('/', upload.single('productImage'), (req, res, next)=>{
 	const product = new Product({
-		//_id: new mongoose.Types.ObjectId,
+		_id: new mongoose.Types.ObjectId,
 		name: req.body.name,
 		price: req.body.price,
-		description: req.body.description
+		description: req.body.description,
+		productImage: req.file.path
 	});
 	//Great care should be taken to ensure that the status for success is sent in the promise. This is because Promises
 	//execute asynchronously as such whether it fails or succeeds the status gets executed.
@@ -61,7 +91,7 @@ router.post('/', (req, res, next)=>{
 				_id: result._id,
 				request: {
 					type: 'GET',
-					url: "http://localhost:3000/products/" + result._id
+					url: "http://localhost:4444/products/" + result._id
 				}
 			}
 		});
@@ -75,7 +105,7 @@ router.post('/', (req, res, next)=>{
 router.get('/:productId', (req, res, next)=>{
 	const id = req.params.productId;
 	Product.findById(id)
-	.select('name price _id description')
+	.select('name price _id description productImage')
 	.exec()
 	.then(doc=>{
 		console.log(doc);
@@ -85,7 +115,7 @@ router.get('/:productId', (req, res, next)=>{
 				product: doc,
 				request:{
 					type: 'GET',
-					url: 'http://localhost:3000/products'
+					url: 'http://localhost:4444/products'
 				}
 			});
 		}else{
@@ -146,7 +176,7 @@ router.patch('/:productId', (req, res, next)=>{
 				message: 'Product updated',
 				request: {
 					type: 'GET',
-					url: 'http://localhost:3000/products/' + id
+					url: 'http://localhost:4444/products/' + id
 				}
 			});
 		})
@@ -215,7 +245,7 @@ router.delete('/:productId', (req, res, next)=>{
 			message: 'Product deleted',
 			request:{
 				type: 'POST',
-				url: 'http://localhost:3000/products',
+				url: 'http://localhost:4444/products',
 				body: {name: 'String', price: 'Number'}
 			}
 		});

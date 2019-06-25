@@ -11,6 +11,8 @@ mongoose.connect('mongodb://127.0.0.1/node-rest-shop', {useNewUrlParser: true}, 
 	console.log('Connected to database');
 });
 
+//middleware for making the uploads folder public
+app.use('/uploads',express.static('uploads'));
 //middleware for handling morgan which logs
 app.use(morgan('dev'));
 //The url encoding sets the type of data the bodyParser should expect. it mostly takes in the html
