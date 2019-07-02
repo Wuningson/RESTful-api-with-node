@@ -27,7 +27,11 @@ const upload = multer({
 	fileSize: 1024 * 1024 * 5
 	},
 	fileFilter
-})
+});
+
+const checkAuth = require('../middleware/check-auth');
+
+//The checkAuth takes a valid token in the headers: authorization. The token is usually created at user login
 
 //To get access to the uploads, we can either have a route to /uploads or use a middleware in the app.js file.
 
@@ -70,7 +74,7 @@ router.get('/', (req, res, next)=>{
 });
 
 //when posting its better to send a status code of 201
-router.post('/', upload.single('productImage'), (req, res, next)=>{
+router.post('/', checkAuth, upload.single('productImage'), (req, res, next)=>{
 	const product = new Product({
 		_id: new mongoose.Types.ObjectId,
 		name: req.body.name,
@@ -130,7 +134,7 @@ router.get('/:productId', (req, res, next)=>{
 	})
 });
 
-router.patch('/:productId', (req, res, next)=>{
+router.patch('/:productId', checkAuth, (req, res, next)=>{
 	const id = req.params.productId;
 	const newName = req.body.newName;
 	const newPrice = req.body.newPrice;
@@ -235,7 +239,7 @@ router.patch('/:productId', (req, res, next)=>{
 
 });
 
-router.delete('/:productId', (req, res, next)=>{
+router.delete('/:productId', checkAuth, (req, res, next)=>{
 	const id = req.params.productId;
 	Product.findById(id)
 	.exec()

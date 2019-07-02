@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 
 const productRoutes = require('./api/routes/products');
 const orderRoutes = require('./api/routes/orders');
+const userRoutes = require('./api/routes/users');
 
 mongoose.connect('mongodb://127.0.0.1/node-rest-shop', {useNewUrlParser: true}, ()=>{
 	console.log('Connected to database');
@@ -41,6 +42,7 @@ app.use((req, res, next)=>{
 //routes handling requests
 app.use('/products', productRoutes);
 app.use('/orders', orderRoutes);
+app.use('/users', userRoutes);
 
 //middleware taking errors
 app.use((req, res, next)=> {
